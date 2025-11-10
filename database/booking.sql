@@ -178,3 +178,13 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
  /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
  /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+-- 1. Sửa vai trò trong bảng 'users'
+ALTER TABLE `users` MODIFY `role` 
+  enum('customer','staff','admin') DEFAULT 'customer';
+
+-- 2. Thêm cột 'price_at_purchase' vào bảng 'orders'
+ALTER TABLE `orders` ADD `price_at_purchase` 
+  INT NOT NULL AFTER `service_option_id`;
+
+-- 3. Thay đổi 'content_url' thành TEXT
+ALTER TABLE `orders` MODIFY `content_url` TEXT DEFAULT NULL;
