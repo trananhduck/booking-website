@@ -1,0 +1,641 @@
+/* -- BIẾN MÀU VÀ FONT -- */
+:root {
+    --schedio-yellow: #fdd03b; /* Màu vàng giống thiết kế */
+    --schedio-dark: #333;
+    --schedio-light-bg: #fffefa; /* Màu nền vàng nhạt */
+    --schedio-blue-dark: #191970; /* Midnight Blue */
+    --schedio-blue-primary: #0000CD; /* Medium Blue */
+    --schedio-blue-hover: #00008B; /* Dark Blue */
+}
+
+body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background-color: var(--schedio-light-bg);
+    color: var(--schedio-dark);
+}
+
+/* -- HEADER -- */
+
+header {
+    background-color: var(--schedio-yellow);
+}
+.navbar-brand {
+    font-size: 1.75rem;
+    color: var(--schedio-dark) !important;
+}
+
+.navbar-nav .nav-link {
+    font-weight: 500;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    color: #555;
+    transition: color 0.3s;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+    color: var(--schedio-dark) !important;
+}
+
+/* Nút icon tròn */
+.btn-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+/* -- NÚT BẤM CHUNG -- */
+.schedio-btn-yellow {
+    background-color: var(--schedio-yellow);
+    border: 2px solid var(--schedio-yellow);
+    color: var(--schedio-dark);
+    font-weight: 700;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.schedio-btn-yellow:hover {
+    background-color: #fbc02d; /* Vàng đậm hơn khi hover */
+    border-color: #fbc02d;
+    color: var(--schedio-dark);
+    transform: translateY(-2px);
+}
+
+.schedio-btn-outline {
+    border: 2px solid var(--schedio-dark);
+    color: var(--schedio-dark);
+    font-weight: 700;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.schedio-btn-outline:hover {
+    background-color: var(--schedio-dark);
+    color: white;
+}
+
+/* -- CÁC GÓI DỊCH VỤ -- */
+.schedio-card {
+    border: 1px solid #eee;
+    border-radius: 12px;
+    background-color: #fff;
+    transition: all 0.3s;
+}
+
+.schedio-card:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+    transform: translateY(-5px);
+}
+
+/* ---------------------------------
+    ABOUT US PAGE
+--------------------------------- 
+*/
+
+.about-content p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+}
+
+/* Tùy chỉnh danh sách gạch đầu dòng */
+.about-list li {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 0.75rem;
+    padding-left: 2rem; /* Tạo không gian cho gạch đầu dòng */
+    position: relative;
+}
+
+.about-list li::before {
+    content: "–"; /* Ký tự gạch ngang */
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-weight: 700;
+    color: var(--schedio-blue-primary); /* Dùng màu xanh cho nhất quán */
+}
+
+/* ---------------------------------
+    SERVICES / PRICING PAGE
+--------------------------------- 
+*/
+
+.hero-banner {
+    padding: 6rem 0;
+    /* Bạn hãy thay link ảnh này bằng link ảnh của bạn */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://i.ibb.co/tZ4V0N6/pricing-banner-bg.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+/* Bảng giá */
+.schedio-pricing-table {
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem; /* Bo góc */
+    overflow: hidden; /* Để bo góc hoạt động với bảng */
+}
+
+/* Tùy chỉnh màu nền cho hàng chẵn (giống thiết kế) */
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: #fff;
+}
+.table-striped > tbody > tr:nth-of-type(even) > * {
+    background-color: var(--schedio-light-bg); /* Dùng màu nền vàng nhạt */
+}
+
+/* Tùy chỉnh header của bảng */
+.table-schedio-header th {
+    background-color: var(--schedio-blue-dark); /* Dùng màu xanh đậm */
+    color: #ffffff;
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+}
+
+/* Tùy chỉnh các ô trong bảng */
+.schedio-pricing-table td {
+    padding: 1.5rem;
+    vertical-align: middle;
+}
+
+.schedio-pricing-table td ul {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* ---------------------------------
+    CONTACT PAGE
+--------------------------------- 
+*/
+.contact-heading {
+    color: var(--schedio-blue-dark);
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.contact-heading i {
+    color: var(--schedio-blue-primary);
+}
+
+.contact-details {
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+.contact-details ul {
+    margin-top: 1rem;
+}
+
+.contact-details li {
+    margin-bottom: 0.5rem;
+}
+
+/* Tùy chỉnh cho form liên hệ */
+.contact-form-wrapper {
+    background-color: #ffffff; /* Nền trắng cho form */
+    border-radius: 12px;
+}
+
+/* Ghi đè style của form-control-schedio 
+   để nó hoạt động trên nền trắng 
+*/
+.contact-form-wrapper .form-control-schedio {
+    background-color: #f8f9fa !important; /* Màu nền xám nhẹ */
+    border-bottom: 2px solid #e0e0e0;
+    padding: 0.75rem; /* Thêm padding cho dễ nhìn */
+    border-radius: 8px; /* Bo góc cho input */
+}
+
+.contact-form-wrapper .form-control-schedio:focus {
+    border-bottom: 2px solid var(--schedio-blue-primary);
+    background-color: #fff !important;
+}
+
+/* Sửa lại label cho phù hợp với nền trắng */
+.contact-form-wrapper .form-label-schedio {
+    color: var(--schedio-dark);
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+/* ---------------------------------
+    SERVICE DETAIL PAGE
+--------------------------------- 
+*/
+
+.package-title {
+    color: var(--schedio-blue-dark);
+    font-weight: 700;
+}
+
+/* Hộp tổng quan */
+.overview-box {
+    background-color: #fff; /* Đổi sang nền trắng cho sạch */
+    border: 1px solid #eee;
+    /* Dùng lại màu nền vàng nhạt cho nổi bật nếu muốn */
+    /* background-color: var(--schedio-light-bg); */
+}
+
+.text-dark-blue {
+    color: var(--schedio-blue-dark);
+}
+
+/* Checklist */
+.checklist {
+    list-style: none;
+    padding-left: 0;
+    font-size: 1.1rem;
+}
+.checklist li {
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+}
+.checklist li i {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-right: 1rem;
+}
+
+/* Dự án minh họa */
+.portfolio-card {
+    border: 1px solid #eee;
+    border-radius: 12px;
+    background-color: #fff;
+    transition: all 0.3s;
+}
+.portfolio-card:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+    transform: translateY(-5px);
+}
+.portfolio-card .card-img-top {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    aspect-ratio: 16/9; /* Giữ tỷ lệ ảnh */
+    object-fit: cover; /* Đảm bảo ảnh lấp đầy */
+}
+
+/* Thẻ giá */
+.price-display {
+    color: var(--schedio-blue-primary);
+    font-weight: 700;
+    font-size: 3rem; /* 48px */
+}
+
+/* ---------------------------------
+    CUSTOMER PROFILE PAGE
+--------------------------------- 
+*/
+
+.text-dark-blue {
+    color: var(--schedio-blue-dark);
+}
+
+/* 1. Sidebar Menu */
+.account-sidebar ul li {
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-link {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--schedio-dark);
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 4px; /* Bo góc nhẹ */
+    transition: all 0.2s;
+}
+
+.sidebar-link:hover {
+    background-color: #f8f9fa;
+    color: var(--schedio-blue-primary);
+}
+
+/* Trạng thái đang chọn (Active) - Nền xám nhạt giống hình */
+.sidebar-link.active {
+    background-color: #f1f3f5; 
+    color: var(--schedio-blue-dark);
+}
+
+/* 2. Tabs (Thông tin / Mật khẩu) */
+.account-tabs .nav-tabs {
+    border-bottom: 1px solid #eee;
+}
+
+.account-tabs .nav-link {
+    color: var(--schedio-blue-dark);
+    font-weight: 600;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding-bottom: 1rem;
+    margin-right: 2rem;
+    background: none;
+}
+
+.account-tabs .nav-link:hover {
+    color: var(--schedio-blue-primary);
+}
+
+/* Tab đang chọn - Gạch chân màu xanh */
+.account-tabs .nav-link.active {
+    color: var(--schedio-blue-primary);
+    border-bottom: 2px solid var(--schedio-blue-primary);
+    background: none;
+}
+
+/* ---------------------------------
+    CUSTOMER BOOKING PAGE
+--------------------------------- 
+*/
+
+#calendar-wrapper {
+    background-color: #fff;
+}
+
+/* Tùy chỉnh FullCalendar */
+:root {
+    --fc-border-color: #eee;
+    --fc-today-bg-color: var(--schedio-light-bg); /* Nền vàng nhạt cho ngày hôm nay */
+    --fc-button-bg-color: var(--schedio-blue-primary);
+    --fc-button-border-color: var(--schedio-blue-primary);
+    --fc-button-hover-bg-color: var(--schedio-blue-hover);
+    --fc-button-hover-border-color: var(--schedio-blue-hover);
+}
+.fc .fc-toolbar-title {
+    font-size: 1.5rem;
+    color: var(--schedio-blue-dark);
+}
+
+/* Màu chữ cho kênh đang đặt */
+.text-schedio-primary {
+    color: var(--schedio-blue-primary);
+    font-weight: 600;
+}
+
+/* -- FOOTER -- */
+.schedio-footer {
+    background-color: var(--schedio-yellow); /* Đổi từ #ffffff sang vàng */
+    border-top: 1px solid #fbc02d; /* Làm cho đường kẻ hợp màu hơn */
+}
+
+/* Đổi màu chữ footer sang tối để dễ đọc trên nền vàng */
+.schedio-footer,
+.schedio-footer p,
+.schedio-footer a.text-muted,
+.schedio-footer a.text-decoration-none {
+    color: var(--schedio-dark) !important;
+    opacity: 0.8;
+}
+
+.schedio-footer a.text-decoration-none:hover {
+    opacity: 1;
+    text-decoration: underline !important;
+}
+
+.schedio-footer h6 {
+    color: var(--schedio-dark);
+}
+
+.schedio-footer hr {
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+/* ---------------------------------
+    BOOKING MODAL STYLES
+--------------------------------- 
+*/
+
+/* Nền của Modal giống trong hình */
+.schedio-modal-content {
+    background-color: var(--schedio-light-bg); /* Màu vàng nhạt */
+    border: none;
+    border-radius: 16px; /* Bo góc tròn trịa */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* Style cho các ô nhập liệu (Input) */
+.form-control-modal {
+    background-color: #f1f3f5; /* Màu xám nhạt cho input */
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+.form-control-modal:focus {
+    background-color: #e9ecef;
+    box-shadow: none; /* Bỏ viền xanh mặc định của Bootstrap */
+}
+
+/* Nút Hủy (Màu trắng) */
+.btn-white {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    color: #333;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.btn-white:hover {
+    background-color: #f8f9fa;
+}
+
+/* Tiêu đề trong modal */
+.modal-title {
+    color: var(--schedio-blue-dark);
+    font-weight: 700;
+}
+
+/* ---------------------------------
+    CHECKOUT PAGE STYLES
+--------------------------------- 
+*/
+
+/* Màu nền vàng nhạt cho các khối (giống thiết kế) */
+.schedio-card-bg {
+    background-color: var(--schedio-light-bg); /* Màu vàng nhạt */
+    border-radius: 8px;
+}
+
+/* Màu nền xám nhạt cho khối chi tiết ngày giờ */
+.bg-light-gray {
+    background-color: #f1f3f5; /* Màu xám rất nhạt */
+}
+
+/* Chỉnh sửa nút thanh toán cho to và rõ */
+.btn-schedio-primary {
+    background-color: var(--schedio-blue-primary); /* Màu xanh đậm */
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.btn-schedio-primary:hover {
+    background-color: var(--schedio-blue-hover);
+}
+
+
+/* ---------------------------------
+    ORDER HISTORY STYLES
+--------------------------------- 
+*/
+
+.bg-light-yellow {
+    background-color: var(--schedio-light-bg) !important; /* Nền vàng nhạt cho bảng */
+}
+
+/* Badge trạng thái tùy chỉnh */
+.bg-primary-light {
+    background-color: #e7f1ff !important;
+    color: #0d6efd !important;
+}
+
+.bg-success-light {
+    background-color: #d1e7dd !important;
+    color: #198754 !important;
+}
+
+/* Tab điều hướng đơn hàng */
+.nav-underline .nav-link {
+    border-bottom: 2px solid transparent;
+    font-size: 0.95rem;
+}
+.nav-underline .nav-link.active {
+    border-bottom: 2px solid var(--schedio-blue-primary);
+    color: var(--schedio-blue-primary) !important;
+    background-color: transparent !important;
+}
+
+/* TIMELINE STYLE */
+.timeline-wrapper {
+    position: relative;
+    padding-left: 10px;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 40px;
+    padding-bottom: 30px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    bottom: -5px;
+    width: 2px;
+    background-color: #e0e0e0;
+}
+
+.timeline-item:last-child::before {
+    display: none;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 2px solid #e0e0e0;
+    z-index: 1;
+}
+
+.timeline-item.active .timeline-marker {
+    background-color: var(--schedio-blue-dark);
+    border-color: var(--schedio-blue-dark);
+}
+
+.timeline-item.active::before {
+    background-color: var(--schedio-blue-dark);
+}
+
+.timeline-item.active .text-status {
+    color: var(--schedio-blue-dark);
+}
+
+.timeline-item:not(.active) .text-status {
+    color: #6c757d;
+}
+
+.text-schedio-primary {
+    color: var(--schedio-blue-primary);
+}
+/* ---------------------------------
+    AUTH PAGES (LOGIN/REGISTER)
+--------------------------------- 
+*/
+.auth-container {
+    max-width: 550px; /* Độ rộng của form */
+    margin-top: 3rem;
+    margin-bottom: 5rem;
+}
+
+.auth-heading {
+    color: var(--schedio-blue-dark);
+    font-weight: 700;
+    font-size: 2.5rem; /* 40px */
+    margin-bottom: 0.5rem;
+}
+
+.auth-subheading {
+    color: #6c757d; /* Bootstrap's text-muted color */
+    margin-bottom: 2.5rem;
+    font-size: 1.1rem;
+}
+
+/* Custom Form Fields */
+.form-label-schedio {
+    color: #6c757d;
+    font-weight: 500;
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+.form-control-schedio {
+    border: none;
+    border-bottom: 2px solid #e0e0e0; /* Light gray line */
+    border-radius: 0;
+    padding: 0.75rem 0.25rem;
+    background-color: transparent !important; /* Quan trọng để nền vàng nhạt */
+    transition: border-color 0.3s;
+}
+
+.form-control-schedio:focus {
+    box-shadow: none;
+    border-bottom: 2px solid var(--schedio-blue-primary);
+}
+
+/* Custom Blue Button */
+.btn-schedio-primary {
+    background-color: var(--schedio-blue-primary);
+    border-color: var(--schedio-blue-primary);
+    color: #ffffff;
+    font-weight: 700;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.btn-schedio-primary:hover {
+    background-color: var(--schedio-blue-hover);
+    border-color: var(--schedio-blue-hover);
+    color: #ffffff;
+}
+
+.form-check-input:checked {
+    background-color: var(--schedio-blue-primary);
+    border-color: var(--schedio-blue-primary);
+}
