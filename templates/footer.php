@@ -11,8 +11,8 @@ if (!isset($base_url)) {
         <div class="row">
             <div class="col-lg-5 col-md-12 mb-4">
                 <h5 class="fw-bold fs-3 mb-3">Schedio</h5>
-                <p class="text-muted">Email: support@schedio.vn</p>
-                <p class="text-muted">Hotline: (084) 123 456 789</p>
+                <p class="text-muted">Email: grft9.contact@gmail.com</p>
+                <p class="text-muted">Hotline: 0344 377 104</p>
                 <div>
                     <a href="#" class="text-muted fs-4 me-3"><i class="bi bi-tiktok"></i></a>
                     <a href="#" class="text-muted fs-4"><i class="bi bi-facebook"></i></a>
