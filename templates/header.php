@@ -125,7 +125,7 @@ if (isset($_SESSION['user_id']) && isset($conn)) {
                     <?php
                     $avatar_url = !empty($_SESSION['user_avatar'])
                         ? $base_url . '/' . htmlspecialchars($_SESSION['user_avatar'])
-                        : 'https://i.ibb.co/5Y8wNcz/user-placeholder.png';
+                        : 'https://images.icon-icons.com/1378/PNG/512/avatardefault_92824.png';
                     ?>
                     <div class="dropdown">
                         <a href="#" class="btn p-0 border-0 user-avatar-btn" data-bs-toggle="dropdown"

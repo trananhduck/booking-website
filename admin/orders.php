@@ -8,95 +8,93 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] != 'admin' && $_SESS
     exit;
 }
 
-// 2. XỬ LÝ BỘ LỌC & PHÂN TRANG
-$where = "1=1"; // Mặc định lấy hết
+// --- CODE MỚI: LOGIC ĐẾM ĐƠN VÀ THÔNG BÁO ---
+// A. Đếm số đơn chờ xử lý (Pending) để hiển thị Badge
+$sql_count_pending = "SELECT COUNT(*) as total FROM orders WHERE status = 'pending'";
+$res_pending = $conn->query($sql_count_pending);
+$pending_count = $res_pending->fetch_assoc()['total'];
+
+// B. Kiểm tra đơn hàng mới nhất để hiện Toast (trong vòng 30 phút qua)
+$show_toast = false;
+$new_order_data = [];
+
+$sql_recent = "SELECT id, title, created_at, u.fullname 
+               FROM orders o 
+               JOIN users u ON o.user_id = u.id
+               WHERE o.status = 'pending' 
+               AND o.created_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE) 
+               ORDER BY o.created_at DESC LIMIT 1";
+$res_recent = $conn->query($sql_recent);
+
+if ($res_recent && $res_recent->num_rows > 0) {
+    $recent_order = $res_recent->fetch_assoc();
+    
+    // Logic Session để không hiện lại thông báo cũ đã xem
+    // Nếu ID đơn mới nhất khác ID đã lưu trong session -> Là đơn mới -> Hiện Toast
+    if (!isset($_SESSION['last_toast_order_id']) || $_SESSION['last_toast_order_id'] != $recent_order['id']) {
+        $show_toast = true;
+        $new_order_data = $recent_order;
+        // Cập nhật session
+        $_SESSION['last_toast_order_id'] = $recent_order['id'];
+    }
+}
+// ------------------------------------------------
+
+// 2. XỬ LÝ BỘ LỌC & PHÂN TRANG (GIỮ NGUYÊN)
+$where = "1=1"; 
 $params = [];
 $types = "";
 
-// -- Lọc Từ khóa (Mã đơn, Tên khách HOẶC Email)
 if (!empty($_GET['keyword'])) {
     $keyword = "%" . trim($_GET['keyword']) . "%";
-    // --- SỬA ĐỔI TẠI ĐÂY: Thêm u.email LIKE ? ---
     $where .= " AND (u.fullname LIKE ? OR u.email LIKE ? OR o.id LIKE ?)";
-    $params[] = $keyword;
-    $params[] = $keyword;
-    $params[] = $keyword;
+    $params[] = $keyword; $params[] = $keyword; $params[] = $keyword;
     $types .= "sss";
 }
 
-// -- Lọc Trạng thái
 if (!empty($_GET['status'])) {
     $where .= " AND o.status = ?";
     $params[] = $_GET['status'];
     $types .= "s";
 }
 
-// -- Lọc Ngày đăng ký
 if (!empty($_GET['date'])) {
     $where .= " AND DATE(o.created_at) = ?";
     $params[] = $_GET['date'];
     $types .= "s";
 }
 
-// -- Lọc Kênh (Platform)
 if (!empty($_GET['platform'])) {
     $where .= " AND pl.id = ?";
     $params[] = $_GET['platform'];
     $types .= "i";
 }
 
-// -- Lọc Gói (Package)
 if (!empty($_GET['package'])) {
     $where .= " AND p.id = ?";
     $params[] = $_GET['package'];
     $types .= "i";
 }
 
-// -- Phân trang
 $limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($page < 1) $page = 1;
 $offset = ($page - 1) * $limit;
 
 // 3. TRUY VẤN DỮ LIỆU
-// -- Đếm tổng
-$sql_count = "
-    SELECT COUNT(*) as total 
-    FROM orders o
-    JOIN users u ON o.user_id = u.id
-    JOIN service_option so ON o.service_option_id = so.id
-    JOIN package p ON so.package_id = p.id
-    JOIN platform pl ON so.platform_id = pl.id
-    WHERE $where
-";
+$sql_count = "SELECT COUNT(*) as total FROM orders o JOIN users u ON o.user_id = u.id JOIN service_option so ON o.service_option_id = so.id JOIN package p ON so.package_id = p.id JOIN platform pl ON so.platform_id = pl.id WHERE $where";
 $stmt = $conn->prepare($sql_count);
 if (!empty($params)) $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $total_rows = $stmt->get_result()->fetch_assoc()['total'];
 $total_pages = ceil($total_rows / $limit);
 
-// -- Lấy dữ liệu chi tiết
-$sql = "
-    SELECT o.id, o.created_at, o.status, 
-           u.fullname AS customer_name, 
-           p.name AS package_name, 
-           pl.name AS platform_name,
-           (SELECT start_time FROM schedules WHERE post_id IN (SELECT id FROM post WHERE order_id = o.id) ORDER BY start_time ASC LIMIT 1) as schedule_time
-    FROM orders o
-    JOIN users u ON o.user_id = u.id
-    JOIN service_option so ON o.service_option_id = so.id
-    JOIN package p ON so.package_id = p.id
-    JOIN platform pl ON so.platform_id = pl.id
-    WHERE $where
-    ORDER BY o.created_at DESC
-    LIMIT $offset, $limit
-";
+$sql = "SELECT o.id, o.created_at, o.status, u.fullname AS customer_name, p.name AS package_name, pl.name AS platform_name, (SELECT start_time FROM schedules WHERE post_id IN (SELECT id FROM post WHERE order_id = o.id) ORDER BY start_time ASC LIMIT 1) as schedule_time FROM orders o JOIN users u ON o.user_id = u.id JOIN service_option so ON o.service_option_id = so.id JOIN package p ON so.package_id = p.id JOIN platform pl ON so.platform_id = pl.id WHERE $where ORDER BY o.created_at DESC LIMIT $offset, $limit";
 $stmt = $conn->prepare($sql);
 if (!empty($params)) $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// -- Lấy danh sách cho Dropdown lọc
 $platforms = $conn->query("SELECT * FROM platform");
 $packages = $conn->query("SELECT * FROM package");
 ?>
@@ -134,63 +132,9 @@ $packages = $conn->query("SELECT * FROM package");
                         value="<?php echo htmlspecialchars($_GET['keyword'] ?? ''); ?>"
                         placeholder="Tìm theo mã đơn (số ID), tên khách hàng, email...">
                 </div>
-
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-3">
-                        <label class="filter-label">Trạng thái:</label>
-                        <select class="form-select form-select-filter" name="status">
-                            <option value="">Tất cả trạng thái</option>
-                            <?php
-                            $statuses = [
-                                'pending' => 'Chờ xử lý',
-                                'design_review' => 'Duyệt Demo',
-                                'waiting_payment' => 'Chờ thanh toán',
-                                'paid' => 'Đã thanh toán',
-                                'in_progress' => 'Đang đăng bài',
-                                'completed' => 'Hoàn thành',
-                                'cancelled' => 'Đã hủy'
-                            ];
-                            foreach ($statuses as $key => $label) {
-                                $selected = (isset($_GET['status']) && $_GET['status'] == $key) ? 'selected' : '';
-                                echo "<option value='$key' $selected>$label</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="filter-label">Ngày đăng ký:</label>
-                        <input type="date" class="form-control form-select-filter" name="date"
-                            value="<?php echo $_GET['date'] ?? ''; ?>">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="filter-label">Kênh truyền thông:</label>
-                        <select class="form-select form-select-filter" name="platform">
-                            <option value="">Tất cả</option>
-                            <?php while ($pl = $platforms->fetch_assoc()): ?>
-                                <option value="<?php echo $pl['id']; ?>"
-                                    <?php if (isset($_GET['platform']) && $_GET['platform'] == $pl['id']) echo 'selected'; ?>>
-                                    <?php echo $pl['name']; ?>
-                                </option>
-                            <?php endwhile; ?>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="filter-label">Gói:</label>
-                        <select class="form-select form-select-filter" name="package">
-                            <option value="">Tất cả</option>
-                            <?php while ($pk = $packages->fetch_assoc()): ?>
-                                <option value="<?php echo $pk['id']; ?>"
-                                    <?php if (isset($_GET['package']) && $_GET['package'] == $pk['id']) echo 'selected'; ?>>
-                                    <?php echo $pk['name']; ?>
-                                </option>
-                            <?php endwhile; ?>
-                        </select>
-                    </div>
-
-                    <div class="col-12 text-end mt-3">
-                        <button type="submit" class="btn btn-filter px-4">Lọc</button>
-                        <a href="orders.php" class="btn btn-reset">Xóa lọc</a>
-                    </div>
+                <div class="col-12 text-end mt-3">
+                    <button type="submit" class="btn btn-filter px-4">Lọc</button>
+                    <a href="orders.php" class="btn btn-reset">Xóa lọc</a>
                 </div>
             </form>
 
@@ -212,30 +156,22 @@ $packages = $conn->query("SELECT * FROM package");
                         </thead>
                         <tbody>
                             <?php if ($result->num_rows > 0): ?>
-                                <?php while ($row = $result->fetch_assoc()): ?>
-                                    <tr>
-                                        <td><input type="checkbox" class="form-check-input"></td>
-                                        <td class="fw-bold text-dark">
-                                            SCD-<?php echo str_pad($row['id'], 3, '0', STR_PAD_LEFT); ?></td>
-                                        <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
-                                        <td>
-                                            <span
-                                                class="badge bg-light text-dark border"><?php echo htmlspecialchars($row['package_name']); ?></span>
-                                        </td>
-                                        <td><?php echo date('d/m/Y', strtotime($row['created_at'])); ?></td>
-                                        <td>
-                                            <?php
-                                            if (!empty($row['schedule_time'])) {
-                                                echo date('d/m/Y H:i', strtotime($row['schedule_time']));
-                                            } else {
-                                                echo '<span class="text-muted small">--</span>';
-                                            }
-                                            ?>
-                                        </td>
-                                        <td><?php echo htmlspecialchars($row['platform_name']); ?></td>
-                                        <td>
-                                            <?php
-                                            // Map trạng thái sang badge
+                            <?php while ($row = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td><input type="checkbox" class="form-check-input"></td>
+                                <td class="fw-bold text-dark">
+                                    SCD-<?php echo str_pad($row['id'], 3, '0', STR_PAD_LEFT); ?></td>
+                                <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
+                                <td><span
+                                        class="badge bg-light text-dark border"><?php echo htmlspecialchars($row['package_name']); ?></span>
+                                </td>
+                                <td><?php echo date('d/m/Y', strtotime($row['created_at'])); ?></td>
+                                <td>
+                                    <?php if (!empty($row['schedule_time'])) { echo date('d/m/Y H:i', strtotime($row['schedule_time'])); } else { echo '<span class="text-muted small">--</span>'; } ?>
+                                </td>
+                                <td><?php echo htmlspecialchars($row['platform_name']); ?></td>
+                                <td>
+                                    <?php
                                             $stt_map = [
                                                 'pending' => ['bg-warning text-dark', 'Chờ xử lý'],
                                                 'design_review' => ['bg-info text-white', 'Duyệt Demo'],
@@ -247,54 +183,52 @@ $packages = $conn->query("SELECT * FROM package");
                                             ];
                                             $s = $stt_map[$row['status']] ?? ['bg-secondary', $row['status']];
                                             ?>
-                                            <span class="status-badge <?php echo $s[0]; ?>"><?php echo $s[1]; ?></span>
-                                        </td>
-                                        <td class="text-center">
-                                            <a href="order_detail.php?id=<?php echo $row['id']; ?>" class="btn btn-view">
-                                                <i class="bi bi-file-text"></i> Xem
-                                            </a>
-                                        </td>
-                                    </tr>
-                                <?php endwhile; ?>
+                                    <span class="status-badge <?php echo $s[0]; ?>"><?php echo $s[1]; ?></span>
+                                </td>
+                                <td class="text-center">
+                                    <a href="order_detail.php?id=<?php echo $row['id']; ?>" class="btn btn-view"><i
+                                            class="bi bi-file-text"></i> Xem</a>
+                                </td>
+                            </tr>
+                            <?php endwhile; ?>
                             <?php else: ?>
-                                <tr>
-                                    <td colspan="9" class="text-center py-5 text-muted">Không tìm thấy đơn hàng nào phù hợp.
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td colspan="9" class="text-center py-5 text-muted">Không tìm thấy đơn hàng nào.</td>
+                            </tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
-
                 <?php if ($total_pages > 1): ?>
-                    <div class="p-3 d-flex justify-content-between align-items-center border-top">
-                        <small class="text-muted">Hiển thị <?php echo $result->num_rows; ?> / <?php echo $total_rows; ?> đơn
-                            hàng</small>
-                        <nav>
-                            <ul class="pagination pagination-sm mb-0">
-                                <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>">
-                                    <a class="page-link"
-                                        href="?page=<?php echo $page - 1; ?>&<?php echo http_build_query(array_diff_key($_GET, ['page' => ''])); ?>">Previous</a>
-                                </li>
-                                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                                    <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>">
-                                        <a class="page-link"
-                                            href="?page=<?php echo $i; ?>&<?php echo http_build_query(array_diff_key($_GET, ['page' => ''])); ?>"><?php echo $i; ?></a>
-                                    </li>
-                                <?php endfor; ?>
-                                <li class="page-item <?php echo ($page >= $total_pages) ? 'disabled' : ''; ?>">
-                                    <a class="page-link"
-                                        href="?page=<?php echo $page + 1; ?>&<?php echo http_build_query(array_diff_key($_GET, ['page' => ''])); ?>">Next</a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
+                <div class="p-3 d-flex justify-content-between align-items-center border-top">
+                </div>
                 <?php endif; ?>
             </div>
-
         </div>
     </div>
 
+    <?php if($show_toast): ?>
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="newOrderToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-primary text-white">
+                <i class="bi bi-bell-fill me-2"></i>
+                <strong class="me-auto">Đơn hàng mới!</strong>
+                <small>Vừa xong</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                Khách hàng <strong><?php echo htmlspecialchars($new_order_data['fullname']); ?></strong> vừa đặt đơn
+                hàng mới:
+                <strong><?php echo htmlspecialchars($new_order_data['title']); ?></strong>
+                <div class="mt-2 pt-2 border-top">
+                    <a href="order_detail.php?id=<?php echo $new_order_data['id']; ?>"
+                        class="btn btn-sm btn-primary w-100">Xử lý ngay</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

@@ -128,30 +128,30 @@ while ($row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/admin-style.css">
     <style>
-        /* CSS sửa lỗi hiển thị bảng */
-        .text-truncate-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            white-space: pre-line;
-            /* Giữ xuống dòng */
-        }
+    /* CSS sửa lỗi hiển thị bảng */
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        white-space: pre-line;
+        /* Giữ xuống dòng */
+    }
 
-        .price-list small {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px dashed #eee;
-            padding: 2px 0;
-        }
+    .price-list small {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px dashed #eee;
+        padding: 2px 0;
+    }
 
-        .price-list small:last-child {
-            border-bottom: none;
-        }
+    .price-list small:last-child {
+        border-bottom: none;
+    }
 
-        .table-custom td {
-            vertical-align: middle;
-        }
+    .table-custom td {
+        vertical-align: middle;
+    }
     </style>
 </head>
 
@@ -182,77 +182,81 @@ while ($row = $result->fetch_assoc()) {
                                 <th style="width: 10%">Slot</th>
                                 <th style="width: 25%">Bảng giá</th>
                                 <th style="width: 10%">Trạng thái</th>
-                                <th style="width: 5%" class="text-center">#</th>
+                                <th style="width: 120px;" class="text-center">Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($packages as $pkg): ?>
-                                <tr>
-                                    <td class="fw-bold"><?php echo $pkg['id']; ?></td>
+                            <tr>
+                                <td class="fw-bold"><?php echo $pkg['id']; ?></td>
 
-                                    <td>
-                                        <span
-                                            class="fw-bold text-primary fs-5"><?php echo htmlspecialchars($pkg['name']); ?></span><br>
-                                        <code class="text-muted small"><?php echo htmlspecialchars($pkg['slug']); ?></code>
-                                    </td>
+                                <td>
+                                    <span
+                                        class="fw-bold text-primary fs-5"><?php echo htmlspecialchars($pkg['name']); ?></span><br>
+                                    <code class="text-muted small"><?php echo htmlspecialchars($pkg['slug']); ?></code>
+                                </td>
 
-                                    <td>
-                                        <div class="text-truncate-2 small text-muted mb-1">
-                                            <em><?php echo htmlspecialchars($pkg['overview']); ?></em>
-                                        </div>
-                                        <div class="small" style="white-space: pre-line; font-size: 0.85rem;">
-                                            <?php
+                                <td>
+                                    <div class="text-truncate-2 small text-muted mb-1">
+                                        <em><?php echo htmlspecialchars($pkg['overview']); ?></em>
+                                    </div>
+                                    <div class="small" style="white-space: pre-line; font-size: 0.85rem;">
+                                        <?php
                                             // Cắt ngắn description nếu dài quá
                                             $desc = htmlspecialchars($pkg['description']);
                                             echo (strlen($desc) > 100) ? substr($desc, 0, 100) . '...' : $desc;
                                             ?>
-                                        </div>
-                                    </td>
+                                    </div>
+                                </td>
 
-                                    <td class="fw-bold text-center"><?php echo $pkg['slot_count']; ?></td>
+                                <td class="fw-bold text-center"><?php echo $pkg['slot_count']; ?></td>
 
-                                    <td>
-                                        <div class="price-list text-muted small">
-                                            <?php if (empty($pkg['prices'])): ?>
-                                                <span class="text-danger fst-italic">Chưa cấu hình giá</span>
-                                            <?php else: ?>
-                                                <?php foreach ($pkg['prices'] as $pr): ?>
-                                                    <div>
-                                                        <span><?php echo $pr['pl_name']; ?></span>
-                                                        <span
-                                                            class="fw-bold text-dark"><?php echo number_format($pr['price']); ?>đ</span>
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </div>
-                                    </td>
-
-                                    <td>
-                                        <?php if ($pkg['active']): ?>
-                                            <span class="badge bg-success-subtle text-success border border-success">Hiển
-                                                thị</span>
+                                <td>
+                                    <div class="price-list text-muted small">
+                                        <?php if (empty($pkg['prices'])): ?>
+                                        <span class="text-danger fst-italic">Chưa cấu hình giá</span>
                                         <?php else: ?>
-                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary">Đang
-                                                ẩn</span>
-                                        <?php endif; ?>
-                                    </td>
-
-                                    <td class="text-center">
-                                        <div class="d-flex gap-1 justify-content-center">
-                                            <button class="btn btn-sm btn-outline-primary"
-                                                onclick="editPackage(<?php echo $pkg['id']; ?>)" title="Sửa">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </button>
-                                            <form method="POST"
-                                                onsubmit="return confirm('CẢNH BÁO: Xóa gói này sẽ xóa luôn lịch sử đơn hàng liên quan!\nBạn có chắc chắn muốn xóa?');">
-                                                <input type="hidden" name="action" value="delete">
-                                                <input type="hidden" name="id" value="<?php echo $pkg['id']; ?>">
-                                                <button class="btn btn-sm btn-outline-danger" title="Xóa"><i
-                                                        class="bi bi-trash"></i></button>
-                                            </form>
+                                        <?php foreach ($pkg['prices'] as $pr): ?>
+                                        <div>
+                                            <span><?php echo $pr['pl_name']; ?></span>
+                                            <span
+                                                class="fw-bold text-dark"><?php echo number_format($pr['price']); ?>đ</span>
                                         </div>
-                                    </td>
-                                </tr>
+                                        <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <?php if ($pkg['active']): ?>
+                                    <span class="badge bg-success-subtle text-success border border-success">Hiển
+                                        thị</span>
+                                    <?php else: ?>
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary">Đang
+                                        ẩn</span>
+                                    <?php endif; ?>
+                                </td>
+
+                                <td class="text-center align-middle">
+                                    <div class="d-flex gap-2 justify-content-center align-items-center">
+
+                                        <button class="btn btn-sm btn-outline-primary"
+                                            onclick="editPackage(<?php echo $pkg['id']; ?>)" title="Sửa">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+
+                                        <form method="POST" style="margin: 0;"
+                                            onsubmit="return confirm('CẢNH BÁO: Xóa gói này sẽ xóa luôn lịch sử đơn hàng liên quan!\nBạn có chắc chắn muốn xóa?');">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id" value="<?php echo $pkg['id']; ?>">
+                                            <button class="btn btn-sm btn-outline-danger" title="Xóa">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </td>
+                            </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
@@ -322,16 +326,16 @@ while ($row = $result->fetch_assoc()) {
                                     theo kênh</h6>
                                 <div class="row g-3">
                                     <?php foreach ($platforms as $pl): ?>
-                                        <div class="col-md-4">
-                                            <label class="small fw-bold mb-1 text-uppercase text-secondary"
-                                                style="font-size: 0.75rem;"><?php echo $pl['name']; ?></label>
-                                            <div class="input-group input-group-sm">
-                                                <input type="number" class="form-control"
-                                                    name="price[<?php echo $pl['id']; ?>]"
-                                                    id="price_<?php echo $pl['id']; ?>" placeholder="0">
-                                                <span class="input-group-text">VNĐ</span>
-                                            </div>
+                                    <div class="col-md-4">
+                                        <label class="small fw-bold mb-1 text-uppercase text-secondary"
+                                            style="font-size: 0.75rem;"><?php echo $pl['name']; ?></label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" class="form-control"
+                                                name="price[<?php echo $pl['id']; ?>]"
+                                                id="price_<?php echo $pl['id']; ?>" placeholder="0">
+                                            <span class="input-group-text">VNĐ</span>
                                         </div>
+                                    </div>
                                     <?php endforeach; ?>
                                 </div>
                             </div>
@@ -348,54 +352,54 @@ while ($row = $result->fetch_assoc()) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const myModal = new bootstrap.Modal(document.getElementById('packageModal'));
+    const myModal = new bootstrap.Modal(document.getElementById('packageModal'));
 
-        function openModal() {
-            document.getElementById('packageForm').reset();
-            document.getElementById('pkgId').value = "0";
-            document.getElementById('modalTitle').innerText = "Thêm gói dịch vụ mới";
-            myModal.show();
-        }
+    function openModal() {
+        document.getElementById('packageForm').reset();
+        document.getElementById('pkgId').value = "0";
+        document.getElementById('modalTitle').innerText = "Thêm gói dịch vụ mới";
+        myModal.show();
+    }
 
-        function editPackage(id) {
-            // Gọi API lấy dữ liệu
-            fetch('get_package.php?id=' + id)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);
-                        return;
-                    }
-                    const pkg = data.package;
-                    const prices = data.prices;
+    function editPackage(id) {
+        // Gọi API lấy dữ liệu
+        fetch('get_package.php?id=' + id)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                const pkg = data.package;
+                const prices = data.prices;
 
-                    // Điền thông tin vào form
-                    document.getElementById('pkgId').value = pkg.id;
-                    document.getElementById('pkgName').value = pkg.name;
-                    document.getElementById('pkgSlug').value = pkg.slug;
-                    document.getElementById('pkgSlots').value = pkg.slot_count;
-                    document.getElementById('pkgStatus').value = pkg.active;
-                    document.getElementById('pkgOverview').value = pkg.overview;
-                    document.getElementById('pkgDesc').value = pkg.description;
-                    document.getElementById('modalTitle').innerText = "Cập nhật: " + pkg.name;
+                // Điền thông tin vào form
+                document.getElementById('pkgId').value = pkg.id;
+                document.getElementById('pkgName').value = pkg.name;
+                document.getElementById('pkgSlug').value = pkg.slug;
+                document.getElementById('pkgSlots').value = pkg.slot_count;
+                document.getElementById('pkgStatus').value = pkg.active;
+                document.getElementById('pkgOverview').value = pkg.overview;
+                document.getElementById('pkgDesc').value = pkg.description;
+                document.getElementById('modalTitle').innerText = "Cập nhật: " + pkg.name;
 
-                    // Reset giá trước
-                    const allPriceInputs = document.querySelectorAll('input[name^="price"]');
-                    allPriceInputs.forEach(input => input.value = '');
+                // Reset giá trước
+                const allPriceInputs = document.querySelectorAll('input[name^="price"]');
+                allPriceInputs.forEach(input => input.value = '');
 
-                    // Điền giá mới
-                    for (const [pid, price] of Object.entries(prices)) {
-                        const input = document.getElementById('price_' + pid);
-                        if (input) input.value = price;
-                    }
+                // Điền giá mới
+                for (const [pid, price] of Object.entries(prices)) {
+                    const input = document.getElementById('price_' + pid);
+                    if (input) input.value = price;
+                }
 
-                    myModal.show();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert("Lỗi khi tải dữ liệu gói!");
-                });
-        }
+                myModal.show();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Lỗi khi tải dữ liệu gói!");
+            });
+    }
     </script>
 
 </body>

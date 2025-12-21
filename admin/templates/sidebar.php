@@ -14,10 +14,20 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <i class="bi bi-grid-fill"></i> Bảng điều khiển
             </a>
 
-            <a href="orders.php"
-                class="nav-link <?php echo ($current_page == 'orders.php' || $current_page == 'order_detail.php') ? 'active' : ''; ?>">
-                <i class="bi bi-cart3"></i> Quản lý đơn hàng
-            </a>
+            <li class="nav-item">
+                <a href="orders.php"
+                    class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'orders.php') ? 'active' : ''; ?>">
+                    <i class="bi bi-cart me-2"></i>
+                    Quản lý đơn hàng
+
+                    <?php
+                    // Kiểm tra nếu biến $pending_count tồn tại và > 0 thì hiện badge
+                    if (isset($pending_count) && $pending_count > 0) {
+                        echo '<span class="badge bg-danger rounded-pill ms-auto float-end">' . $pending_count . '</span>';
+                    }
+                    ?>
+                </a>
+            </li>
 
             <a href="calendar.php" class="nav-link <?php echo $current_page == 'calendar.php' ? 'active' : ''; ?>">
                 <i class="bi bi-calendar-week"></i> Lịch đăng bài

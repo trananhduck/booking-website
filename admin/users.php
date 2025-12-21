@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/db.php';
+// require_once '../config/functions.php'; // Nếu bạn đã có file này thì bỏ comment, nếu chưa thì code bên dưới vẫn chạy tốt
 
 // 1. KIỂM TRA QUYỀN ADMIN
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] != 'admin') {
@@ -28,7 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_staff'])) {
         $error = "Email này đã được sử dụng!";
     } else {
         $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
-        // Lưu ý: Đã thêm cột is_active vào câu insert
         $stmt = $conn->prepare("INSERT INTO users (fullname, email, password, role, phonenumber, is_active) VALUES (?, ?, ?, ?, ?, 1)");
         if ($stmt) {
             $stmt->bind_param("sssss", $fullname, $email, $hashed_pass, $role, $phone);
@@ -71,7 +71,6 @@ $where = "1=1";
 $params = [];
 $types = "";
 
-// Tìm kiếm
 if (!empty($_GET['keyword'])) {
     $keyword = "%" . trim($_GET['keyword']) . "%";
     $where .= " AND (fullname LIKE ? OR email LIKE ? OR phonenumber LIKE ?)";
@@ -79,14 +78,12 @@ if (!empty($_GET['keyword'])) {
     $types .= "sss";
 }
 
-// Vai trò
 if (!empty($_GET['role'])) {
     $where .= " AND role = ?";
     $params[] = $_GET['role'];
     $types .= "s";
 }
 
-// Trạng thái
 if (isset($_GET['status']) && $_GET['status'] !== '') {
     $where .= " AND is_active = ?";
     $params[] = $_GET['status'];
@@ -99,14 +96,9 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($page < 1) $page = 1;
 $offset = ($page - 1) * $limit;
 
-// Đếm tổng (Kèm bắt lỗi)
 $sql_count = "SELECT COUNT(*) as total FROM users WHERE $where";
 $stmt = $conn->prepare($sql_count);
-
-if (!$stmt) {
-    // Nếu lỗi ở đây -> Thường do sai tên cột (ví dụ chưa có is_active)
-    die("Lỗi Hệ thống (SQL Prepare): " . $conn->error . "<br>Vui lòng kiểm tra lại cơ sở dữ liệu.");
-}
+if (!$stmt) { die("Lỗi Hệ thống (SQL Prepare): " . $conn->error); }
 
 if (!empty($params)) {
     $stmt->bind_param($types, ...$params);
@@ -116,7 +108,6 @@ $total_rows = $stmt->get_result()->fetch_assoc()['total'];
 $total_pages = ceil($total_rows / $limit);
 $stmt->close();
 
-// Lấy dữ liệu
 $sql = "SELECT * FROM users WHERE $where ORDER BY created_at DESC LIMIT $offset, $limit";
 $stmt = $conn->prepare($sql);
 if (!empty($params)) {
@@ -135,6 +126,16 @@ $users = $stmt->get_result();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="assets/css/admin-style.css">
+
+    <style>
+    .custom-tooltip-rank {
+        font-size: 0.9rem;
+    }
+
+    .cursor-help {
+        cursor: help;
+    }
+    </style>
 </head>
 
 <body>
@@ -217,16 +218,40 @@ $users = $stmt->get_result();
                             <?php if ($users->num_rows > 0): ?>
                             <?php while($u = $users->fetch_assoc()): ?>
                             <?php 
-                                        $avatar = !empty($u['avatar']) ? '../'.$u['avatar'] : 'https://ui-avatars.com/api/?name='.urlencode($u['fullname']).'&background=random&color=fff';
-                                        
-                                        $role_badge = match($u['role']) {
-                                            'admin' => '<span class="badge bg-dark">Quản trị viên</span>',
-                                            'staff' => '<span class="badge bg-primary bg-opacity-10 text-primary">Nhân viên</span>',
-                                            default => '<span class="badge bg-light text-dark border">Khách hàng</span>',
-                                        };
+                                    $avatar = !empty($u['avatar']) ? '../'.$u['avatar'] : 'https://ui-avatars.com/api/?name='.urlencode($u['fullname']).'&background=random&color=fff';
+                                    
+                                    $role_badge = match($u['role']) {
+                                        'admin' => '<span class="badge bg-dark">Quản trị viên</span>',
+                                        'staff' => '<span class="badge bg-primary bg-opacity-10 text-primary">Nhân viên</span>',
+                                        default => '<span class="badge bg-light text-dark border">Khách hàng</span>',
+                                    };
 
-                                        // Kiểm tra nếu cột is_active chưa có (để tránh lỗi hiển thị nếu chưa chạy SQL)
-                                        $is_active = isset($u['is_active']) ? $u['is_active'] : 1; 
+                                    $is_active = isset($u['is_active']) ? $u['is_active'] : 1; 
+
+                                    // --- LOGIC TOOLTIP CHO KHÁCH HÀNG ---
+                                    $tooltip_attr = "";
+                                    if ($u['role'] == 'customer') {
+                                        $rank = $u['rank_level'] ?? 'newbie';
+                                        $spent = number_format($u['total_spent'] ?? 0, 0, ',', '.');
+                                        
+                                        // Định nghĩa màu sắc hiển thị cho đẹp
+                                        $rank_colors = [
+                                            'newbie' => '#6c757d', // Gray
+                                            'underground' => '#0dcaf0', // Cyan
+                                            'mainstream' => '#0d6efd', // Blue
+                                            'superstar' => '#ffc107' // Yellow
+                                        ];
+                                        $rank_color = $rank_colors[$rank] ?? '#6c757d';
+                                        
+                                        // Nội dung HTML hiển thị trong Tooltip
+                                        $tooltip_html = "<div class='text-start custom-tooltip-rank'>"
+                                            . "Hạng: <b style='color:{$rank_color}'>" . ucfirst($rank) . "</b><br>"
+                                            . "Chi tiêu: <b>{$spent} đ</b>"
+                                            . "</div>";
+                                        
+                                        $tooltip_attr = "data-bs-toggle='tooltip' data-bs-html='true' title=\"$tooltip_html\" class='cursor-help'";
+                                    }
+                                    // ------------------------------------
                                     ?>
                             <tr class="<?php echo $is_active ? '' : 'table-light text-muted'; ?>">
                                 <td class="ps-4">
@@ -236,8 +261,13 @@ $users = $stmt->get_result();
                                             class="rounded-circle me-3 <?php echo $is_active ? '' : 'grayscale'; ?>"
                                             width="40" height="40" style="object-fit:cover;">
                                         <div>
-                                            <div class="fw-bold text-dark">
-                                                <?php echo htmlspecialchars($u['fullname']); ?></div>
+                                            <div class="fw-bold text-dark" <?php echo $tooltip_attr; ?>>
+                                                <?php echo htmlspecialchars($u['fullname']); ?>
+                                                <?php if($u['role'] == 'customer' && isset($u['rank_level']) && $u['rank_level'] == 'superstar'): ?>
+                                                <i class="bi bi-patch-check-fill text-warning ms-1"
+                                                    title="Superstar"></i>
+                                                <?php endif; ?>
+                                            </div>
                                             <small
                                                 class="text-muted"><?php echo htmlspecialchars($u['email']); ?></small>
                                         </div>
@@ -356,6 +386,13 @@ $users = $stmt->get_result();
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+    </script>
 </body>
 
 </html>
